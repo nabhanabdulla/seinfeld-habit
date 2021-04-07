@@ -22,6 +22,22 @@
   2. Fulfilled -> Resolved
   3. Fulfilled -> Rejected
 
+
+## What problem(s) does Promises solve?
+
+### 1. Escape from Callback hell
+There will be scenarios where we'll need to wait for an asynchronous operation to be executed only after another asynchronous operation has completed. For example, let's say a user needs to book an Uber. There'll be a set of steps that happen in the background to complete the booking process (respective *asynchronous* functions that does these are given in brackets)
+
+1. Deduct ride amount from user's e-wallet (`deductUserBalance(userId, rideId)`)
+1. Find a nearby Uber drive whose available for the ride (`findNearbyDriver(usersCurrentLocation)`) 
+1. Send ride info to the nearby Uber driver (`sendRideInfoToDriver(rideId)`)
+1. Give the user update on the Uber driver location (`confirmBooking(rideId, driverId)`)
+
+Now, the 
+<!-- Add callback hell code -->
+
+### 2. Cleaner code
+
 ## How to use a Promise?
 
 - We create a Promise using the `Promise` constructor
@@ -109,3 +125,15 @@ promise
     console.log("Promise rejection value: ", rejectedOutput);
  })
 ```
+
+
+<hr>
+Author notes
+
+- Can be a series of resources to learn Promises in different ways based on learners's preference
+
+    1. Plain text
+    1. Plain text with learn by doing
+    1. ...
+
+- When learning to create videos/decks, the updates can still be added to repo for record
