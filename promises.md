@@ -28,13 +28,28 @@
 ### 1. Escape from Callback hell
 There will be scenarios where we'll need to wait for an asynchronous operation to be executed only after another asynchronous operation has completed. For example, let's say a user needs to book an Uber. There'll be a set of steps that happen in the background to complete the booking process (respective *asynchronous* functions that does these are given in brackets)
 
-1. Deduct ride amount from user's e-wallet (`deductUserBalance(userId, rideId)`)
-1. Find a nearby Uber drive whose available for the ride (`findNearbyDriver(usersCurrentLocation)`) 
-1. Send ride info to the nearby Uber driver (`sendRideInfoToDriver(rideId)`)
-1. Give the user update on the Uber driver location (`confirmBooking(rideId, driverId)`)
+1. Deduct ride amount from user's e-wallet (`deductUserBalance(userId, rideId, callbackFn)`)
+1. Get the user's current location (`getUsersCurrentLocation(userId, callbackFn)`)
+1. Find a nearby Uber drive whose available for the ride (`findNearbyDriver(usersCurrentLocation, callbackFn)`) 
+1. Send ride info to the nearby Uber driver (`sendRideInfoToDriver(rideId, callbackFn)`)
+1. Give the user update on the Uber driver location (`confirmBooking(rideId, callbackFn)`)
 
-Now, the 
+Now, the implementation using callback functions will be somewhat like below
 <!-- Add callback hell code -->
+```
+deductUserBalance(userId, rideId, function(error, userId) {
+    getUsersCurrentLocation(userId, function(error, usersCurrentLocation) {
+        findNearbyDriver(usersCurrentLocation, function(error, rideId) {
+            sendRideInfoToDriver(rideId, function(error, rideId) {
+                confirmBooking(rideId, function(err, rideId) {
+                    console.log("Booking complete");
+                })
+            })
+        })
+    })
+})
+```
+Even without error handling and no additional logic other than calling the functions, the implementation just got messy and hard to understand easily. This, ladies and gentleman, is what *callback hell* is!
 
 ### 2. Cleaner code
 
@@ -134,6 +149,10 @@ Author notes
 
     1. Plain text
     1. Plain text with learn by doing
+    1. Full video
+        1. Talking + 
+        1. Animations
+    1. Full video + activities
     1. ...
 
 - When learning to create videos/decks, the updates can still be added to repo for record
