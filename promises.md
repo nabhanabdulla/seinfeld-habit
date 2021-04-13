@@ -3,13 +3,13 @@
 ## Questions answered
 
 1. What are Promises?
-1. Why should I use Promise?
+1. (?) Why should I use Promise?
 1. What problem(s) does Promise solve?
 1. How to use a Promise?
+1. Chaining promises
 1. When to use a Promise?
 1. Commmon pitfalls when using Promises
 1. Promise alternatives / improvements
-1. Chaining promises
 
 ## What are Promises?
 
@@ -36,7 +36,7 @@ There will be scenarios where we'll need to wait for an asynchronous operation t
 
 Now, the implementation using callback functions will be somewhat like below
 <!-- Add callback hell code -->
-```
+```v
 deductUserBalance(userId, rideId, function(error, userId) {
     getUsersCurrentLocation(userId, function(error, usersCurrentLocation) {
         findNearbyDriver(usersCurrentLocation, function(error, rideId) {
@@ -51,19 +51,17 @@ deductUserBalance(userId, rideId, function(error, userId) {
 ```
 Even without error handling and no additional logic other than calling the functions, the implementation just got messy and hard to understand easily. This, ladies and gentleman, is what *callback hell* is!
 
-### 2. Cleaner code
-
 ## How to use a Promise?
 
 - We create a Promise using the `Promise` constructor
 
-```
+```javascript
 let promise = new Promise()
 ```
 
 - The constructor takes in as argument, a callback function specifying the code to be executed asynchronously
 
-```
+```javascript
 let promiseCallback = function(resolve, reject) {
     // code to be executed asynchronously
 }
@@ -73,7 +71,7 @@ let promise = new Promise(promiseCallback);
 
 - To specify the promise code executed completely (i.e, resolved) we use the `resolve` parameter of the callback function
 
-```
+```javascript
 let promiseCallback = function(resolve, reject) {
     // code to be executed asynchronously
 
@@ -86,7 +84,7 @@ let promise = new Promise(promiseCallback);
 
 - Similarly, calling `reject` specifies the promise was rejected
 
-```
+```javascript
 let promiseCallback = function(resolve, reject) {
     // code to be executed asynchronously
 
@@ -102,7 +100,7 @@ let promise = new Promise(promiseCallback);
     - Code in `.then()` block gets executed for a resolved Promise
     - Code in `.catch()` block gets executed for a rejected Promise
 
-```
+```javascript
 let promiseCallback = function(resolve, reject) {
     // code to be executed asynchronously
 
@@ -122,7 +120,7 @@ promise
 ```
 
 - If you need to send back some value from the promise callback function, you can do so by passing it as a parameter to the `resolve`/`reject` functions
-```
+```javascript
 let promiseCallback = function(resolve, reject) {
     // code to be executed asynchronously
 
@@ -141,7 +139,49 @@ promise
  })
 ```
 
+## When to use a Promise?
+Promises are used in scenarios where we have some operation or set of operations which takes time to complete but can be run independent of the rest of the code. 
 
+## Commmon pitfalls when using Promises
+1. Promise output is neither stored to the variable the Promise is assigned to, nor the `.then()` or `.catch()` blocks are assigned. It's because the value is available only later once the promise is fulfilled.
+```javascript
+let promise = new Promise (function (resolve, reject) {
+    resolve("Promise output");
+})
+
+console.log(promise === "Promise output"); // prints false
+
+let promiseThen = promise
+ .then(function(resolveMsg) {
+     console.log(resolveMsg === "Promise output"); // prints true
+ })
+
+console.log(promiseThen === "Promise output"); // prints false
+``` 
+
+2. The `.then()`, `.catch()` statements aren't synchronous as well
+```javascript
+console.log("Before promise creation");
+let promise = new Promise (function (resolve, reject) {
+    resolve("Promise output");
+})
+console.log("After promise creation");
+
+console.log("Before then block");
+promise
+ .then(function(resolveMsg) {
+     console.log(resolveMsg);
+ })
+console.log("After then block");
+```
+Above code snippet will print
+```
+Before promise creation
+After promise creation
+Before then block
+After then block
+Promise output
+``` 
 <hr>
 Author notes
 
