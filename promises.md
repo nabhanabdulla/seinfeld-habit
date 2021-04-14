@@ -2,14 +2,14 @@
 
 ## Questions answered
 
-1. What are Promises?
-1. (?) Why should I use Promise?
-1. What problem(s) does Promise solve?
-1. How to use a Promise?
-1. Chaining promises
-1. When to use a Promise?
-1. Commmon pitfalls when using Promises
-1. Promise alternatives / improvements
+- [x] What are Promises?
+- [ ] (?) Why should I use Promise?
+- [x] What problem(s) does Promise solve?
+- [x] How to use a Promise?
+- [ ] Chaining promises
+- [x] When to use a Promise?
+- [x] Commmon pitfalls when using Promises
+- [ ] Promise alternatives / improvements
 
 ## What are Promises?
 
@@ -29,17 +29,19 @@
 There will be scenarios where we'll need to wait for an asynchronous operation to be executed only after another asynchronous operation has completed. For example, let's say a user needs to book an Uber. There'll be a set of steps that happen in the background to complete the booking process (respective *asynchronous* functions that does these are given in brackets)
 
 1. Deduct ride amount from user's e-wallet (`deductUserBalance(userId, rideId, callbackFn)`)
-1. Get the user's current location (`getUsersCurrentLocation(userId, callbackFn)`)
-1. Find a nearby Uber drive whose available for the ride (`findNearbyDriver(usersCurrentLocation, callbackFn)`) 
+1. Get the user's current location (`getUserLocation(userId, callbackFn)`)
+1. Find a nearby Uber drive whose available for the ride (`findNearbyDriver(userLocation, callbackFn)`) 
 1. Send ride info to the nearby Uber driver (`sendRideInfoToDriver(rideId, callbackFn)`)
 1. Give the user update on the Uber driver location (`confirmBooking(rideId, callbackFn)`)
 
+As all of these functions are asynchronous, we don't have a mechanism to return a value from these but only to make it accessible to the callback function when the value's ready.
+
 Now, the implementation using callback functions will be somewhat like below
 <!-- Add callback hell code -->
-```v
+```javascript
 deductUserBalance(userId, rideId, function(error, userId) {
-    getUsersCurrentLocation(userId, function(error, usersCurrentLocation) {
-        findNearbyDriver(usersCurrentLocation, function(error, rideId) {
+    getUserLocation(userId, function(error, userLocation) {
+        findNearbyDriver(userLocation, function(error, rideId) {
             sendRideInfoToDriver(rideId, function(error, rideId) {
                 confirmBooking(rideId, function(err, rideId) {
                     console.log("Booking complete");
@@ -139,6 +141,55 @@ promise
  })
 ```
 
+## Chaining Promises
+Let's go back to the earlier Uber booking example. We'll start with the first two component functions
+```javascript
+deductUserBalance(userId, rideId, function(error, userId) {
+    getUserLocation(userId, function(error, userLocation) {
+        // more logic
+    })
+})
+```
+How do we translate this logic using callbacks to Promises?
+
+To recall, 
+* The `deductUserBalance()` function does some processing using the `userId` and `rideId` parameters
+
+* A callback function is passed to it which in turn calls the `getUserLocation()` function
+
+* The callback function will be called back inside the `deductUserBalance()` function
+
+We'll use synchronous versions of these methods and then plug in asynchronousity using Promises.
+
+```javascript
+let deductUserBalancePromise = new Promise(resolve, reject) {
+    let userId = deductUserBalanceSync(userId, rideId);
+    resolve(userId);
+}
+
+let getUserLocationPromise = new Promise(resolve, reject) {
+    let userLocation = getUserLocationSync(userId);
+    resolve(userLocation);
+}
+
+deductUserBalancePromise
+ .then(function (msg) {
+     return getUserLocationPromise;
+ })
+ .then(function (msg) {
+     console.log("userLocation: ", msg);
+ });
+
+```
+
+
+Note: We assumed the callback function is an optional argument to the functions.
+
+
+If you have different promises and you need these to be fulfilled in a specific order, you can utilise chaining for this.
+
+For example, 
+
 ## When to use a Promise?
 Promises are used in scenarios where we have some operation or set of operations which takes time to complete but can be run independent of the rest of the code. 
 
@@ -159,7 +210,12 @@ let promiseThen = promise
 console.log(promiseThen === "Promise output"); // prints false
 ``` 
 
-2. The `.then()`, `.catch()` statements aren't synchronous as well
+2. If a value is returned from within `.then()` block, we'll need to use another `.then()` block to process it.
+```
+
+```
+
+3. The `.then()`, `.catch()` statements aren't synchronous as well
 ```javascript
 console.log("Before promise creation");
 let promise = new Promise (function (resolve, reject) {
