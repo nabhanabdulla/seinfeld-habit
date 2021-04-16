@@ -6,10 +6,9 @@
 - [ ] (?) Why should I use Promise?
 - [x] What problem(s) does Promise solve?
 - [x] How to use a Promise?
+- [ ] Promise alternatives / improvements
 - [ ] Chaining promises
 - [x] When to use a Promise?
-- [x] Commmon pitfalls when using Promises
-- [ ] Promise alternatives / improvements
 
 ## What are Promises?
 
@@ -141,6 +140,54 @@ promise
  })
 ```
 
+## Commmon pitfalls when using Promises
+1. Promise output is neither stored to the variable the Promise is assigned to, nor the `.then()` or `.catch()` blocks are assigned. It's because the value is available only later once the promise is fulfilled.
+```javascript
+let promise = new Promise (function (resolve, reject) {
+    resolve("Promise output");
+})
+
+console.log(promise === "Promise output"); // prints false
+
+let promiseThen = promise
+ .then(function(resolveMsg) {
+     console.log(resolveMsg === "Promise output"); // prints true
+ })
+
+console.log(promiseThen === "Promise output"); // prints false
+``` 
+
+2. If a value is returned from within `.then()` block, we'll need to use another `.then()` block to process it.
+```
+
+```
+<!-- Note: Mention .then()/.catch() returns a Promise -->
+
+3. The `.then()`, `.catch()` statements aren't synchronous as well
+```javascript
+console.log("Before promise creation");
+let promise = new Promise (function (resolve, reject) {
+    resolve("Promise output");
+})
+console.log("After promise creation");
+
+console.log("Before then block");
+promise
+ .then(function(resolveMsg) {
+     console.log(resolveMsg);
+ })
+console.log("After then block");
+```
+Above code snippet will print
+```
+Before promise creation
+After promise creation
+Before then block
+After then block
+Promise output
+``` 
+
+
 ## Chaining Promises
 Let's go back to the earlier Uber booking example. We'll start with the first two component functions
 ```javascript
@@ -171,7 +218,36 @@ let getUserLocationPromise = new Promise(resolve, reject) {
     let userLocation = getUserLocationSync(userId);
     resolve(userLocation);
 }
+```
+Note: We assumed the callback function is an optional argument to the functions.
 
+Now, how do we fulfill the `getUserLocationPromise` only after `deductUserBalancePromise` is resolved? Will the below code work?
+```
+let userId = deductUserBalancePromise
+ .then(function (userId) {
+     return userId;
+ })
+ .catch(function (err) {
+     console.log("Err: ", err);
+ });
+
+ let userLocation = getUserLocationPromise
+ .then(function (userLocation) {
+     return userLocation;
+ })
+ .catch(function (err) {
+     console.log("Err: ", err);
+ });
+```
+This wouldn't work for two reasons
+1. As we're having different `.then()`/`.catch()` blocks for both the Promises, these will be fulfilled independent of each other. We won't be able to ensure `getUserLocationPromise` is resolved only after `deductUserBalancePromise` always
+2. Trying to store the output of the `.then()`/`.catch()` block wouldn't  work. You saw "why" in the "Commmon pitfalls when using Promises" section earlier
+
+The correct way to do this will be to
+1. Fulfil the `deductUserBalancePromise` promise
+2. If resolved, return the dependent promise, `getUserLocationPromise`
+3. Use another `.then()`/`.catch()` block to fulfil this promise now
+```
 deductUserBalancePromise
  .then(function (msg) {
      return getUserLocationPromise;
@@ -179,65 +255,17 @@ deductUserBalancePromise
  .then(function (msg) {
      console.log("userLocation: ", msg);
  });
-
 ```
-
-
-Note: We assumed the callback function is an optional argument to the functions.
-
 
 If you have different promises and you need these to be fulfilled in a specific order, you can utilise chaining for this.
 
 For example, 
 
+
+### (Optional) Converting functions with callbacks to Promises
 ## When to use a Promise?
 Promises are used in scenarios where we have some operation or set of operations which takes time to complete but can be run independent of the rest of the code. 
 
-## Commmon pitfalls when using Promises
-1. Promise output is neither stored to the variable the Promise is assigned to, nor the `.then()` or `.catch()` blocks are assigned. It's because the value is available only later once the promise is fulfilled.
-```javascript
-let promise = new Promise (function (resolve, reject) {
-    resolve("Promise output");
-})
-
-console.log(promise === "Promise output"); // prints false
-
-let promiseThen = promise
- .then(function(resolveMsg) {
-     console.log(resolveMsg === "Promise output"); // prints true
- })
-
-console.log(promiseThen === "Promise output"); // prints false
-``` 
-
-2. If a value is returned from within `.then()` block, we'll need to use another `.then()` block to process it.
-```
-
-```
-
-3. The `.then()`, `.catch()` statements aren't synchronous as well
-```javascript
-console.log("Before promise creation");
-let promise = new Promise (function (resolve, reject) {
-    resolve("Promise output");
-})
-console.log("After promise creation");
-
-console.log("Before then block");
-promise
- .then(function(resolveMsg) {
-     console.log(resolveMsg);
- })
-console.log("After then block");
-```
-Above code snippet will print
-```
-Before promise creation
-After promise creation
-Before then block
-After then block
-Promise output
-``` 
 <hr>
 Author notes
 
